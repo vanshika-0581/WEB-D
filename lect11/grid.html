@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOUNSING BALL</title>
+     <style>
+      .parent{
+        height: 700px;
+        border: 3px solid;
+        display: grid;
+        grid-template-columns: 300px 300px 300px 300px;
+        grid-template-rows: 200px 200px 200px 200px;
+        gap: 20px;
+      }
+       .child{
+        background-color:whitesmoke;
+        border: 1px solid  pink;
+        overflow: hidden;
+       }
+       #one{
+        background-color: chocolate;
+        /* grid-column-start: 2;
+        grid-column-end: 3; */
+       }
+       #two{
+        background-color: cadetblue;
+        /* grid-row-start: 3;
+        grid-row-end: 4; */
+       }
+       #three{
+        background-color: darkred;
+       }
+       #four{
+        background-color: burlywood;
+       }
+       #five{
+        background-color: aquamarine;
+       }
+       .child img{
+        height: 100%;
+        width: 100%;
+        background-size: cover;
+        transition: 0.4s ease;
+       }
+       .child:hover img{
+        transform: scale(2);
+       }
+     </style>
+ </head>
+ <body>
+  <div class="parent">
+    <div class="child" id="one">
+        <img src="https://tse1.mm.bing.net/th/id/OIP.t7zfvX1FEPacRO5ZX9-CSwHaEJ?pid=Api&P=0&h=220">   
+     </div>
+    <div class="child" id="two">
+        <img src="https://tse3.mm.bing.net/th/id/OIP.oomHkom6t0V_0a3GbLIbvAHaE8?pid=Api&P=0&h=220">
+        </div>
+    <div class="child" id="three">
+        <img src="https://tse4.mm.bing.net/th/id/OIP.2uhGwvK-rGXAdfORke4wTAHaEK?pid=Api&P=0&h=220">
+    </div>
+    <div class="child" id="four">
+        <img src="https://tse1.mm.bing.net/th/id/OIP.BpoN9roljDfTcHAJu0UMgwHaE8?pid=Api&P=0&h=220">
+    </div>
+    <div class="child" id="five">
+        <img src="https://tse2.mm.bing.net/th/id/OIP.WMVmrRhhABkMlrKZfYNvSQHaJ4?pid=Api&P=0&h=220">
+    </div>
+    <div class="child" id="six">
+        <img src="https://tse1.mm.bing.net/th/id/OIP.qD2FGqiZpzRKnVUJWuwgPQHaJ4?pid=Api&P=0&h=220">
+    </div>
+    <div class="child" id="seven">
+        <img src="https://tse2.mm.bing.net/th?id=OIF.rJlFRf0xrt%2f2yGi3nf88Kg&pid=Api&P=0&h=220">
+    </div>
+    <div class="child" id="eight">8</div>
+    <div class="child" id="nine">9</div>
+    <div class="child" id="ten">10</div>
+    <div class="child" id="eleven">11</div>
+    <div class="child" id="twelve">12</div>
+  </div>
+ 
+ </body>
+</html>
