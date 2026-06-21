@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aceify — AI Interview Preparation Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+:root{
+  --bg:#ffffff;
+  --surface:#F7F7FD;
+  --surface-2:#F0EFFC;
+  --violet:#6C4CF1;
+  --violet-dark:#4B2FD6;
+  --indigo:#241A66;
+  --blue:#3D8BFF;
+  --ink:#15132B;
+  --muted:#6B6A82;
+  --line:#E8E6F7;
+  --success:#1FAE7A;
+  --warn:#F0A93D;
+  --danger:#EF5C6E;
+  --radius-lg:24px;
+  --radius-md:16px;
+  --radius-sm:10px;
+  --shadow-soft: 0 10px 30px -12px rgba(76,47,214,0.18);
+  --shadow-card: 0 1px 2px rgba(21,19,43,0.04), 0 8px 24px -10px rgba(76,47,214,0.12);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4,.display{ font-family:'Space Grotesk',sans-serif; letter-spacing:-0.02em;}
+.mono{font-family:'JetBrains Mono',monospace;}
+a{text-decoration:none; color:inherit;}
+button{font-family:inherit; cursor:pointer; border:none;}
+ul{list-style:none;}
+
+/* ===== Texture / background ===== */
+.grain-bg{
+  position:relative;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(108,76,241,0.10), transparent 40%),
+    radial-gradient(circle at 90% 0%, rgba(61,139,255,0.10), transparent 38%),
+    #ffffff;
+}
+
+/* ===== Top App Switcher (demo nav across the 6 pages) ===== */
+.demo-switcher{
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,0.85);
+  backdrop-filter:blur(14px) saturate(160%);
+  border-bottom:1px solid var(--line);
+  padding:10px 18px;
+  overflow-x:auto;
+  white-space:nowrap;
+}
+.demo-switcher .brandmark{
+  display:flex; align-items:center; gap:8px; padding:6px 14px 6px 6px; margin-right:8px; border-right:1px solid var(--line);
+  font-family:'Space Grotesk'; font-weight:700; font-size:16px;
+}
+.demo-switcher .logo-orb{width:26px;height:26px;border-radius:50%;background:conic-gradient(from 180deg,var(--violet),var(--blue),var(--violet));box-shadow:0 0 0 3px rgba(108,76,241,0.12);}
+.switch-btn{
+  padding:8px 16px; border-radius:999px; font-size:13.5px; font-weight:600; color:var(--muted);
+  background:transparent; transition:all .2s ease; flex-shrink:0;
+}
+.switch-btn:hover{ background:var(--surface); color:var(--ink); }
+.switch-btn.active{ background:var(--ink); color:#fff; }
+
+.page{ display:none; }
+.page.active{ display:block; animation:fadein .45s ease; }
+@keyframes fadein{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+/* ===== Buttons ===== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:14px 26px; border-radius:14px; font-weight:600; font-size:15px;
+  transition:transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--violet),var(--blue));
+  color:#fff; box-shadow:0 12px 24px -8px rgba(108,76,241,0.5);
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 16px 30px -8px rgba(108,76,241,0.6); }
+.btn-secondary{
+  background:#fff; color:var(--ink); border:1.5px solid var(--line);
+}
+.btn-secondary:hover{ border-color:var(--violet); color:var(--violet); transform:translateY(-2px); }
+.btn-ghost{ background:var(--surface); color:var(--ink); }
+.btn-ghost:hover{ background:var(--surface-2); }
+.btn-sm{ padding:9px 16px; font-size:13px; border-radius:10px; }
+
+/* ===== Card ===== */
+.card{
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-card);
+}
+.glass{
+  background:rgba(255,255,255,0.6);
+  backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,0.6);
+  box-shadow:0 8px 32px rgba(76,47,214,0.12);
+}
+
+/* ===== AI Orb signature element ===== */
+.ai-orb-wrap{ position:relative; width:280px; height:280px; display:flex; align-items:center; justify-content:center; }
+.ai-orb{
+  width:140px; height:140px; border-radius:50%;
+  background:conic-gradient(from 120deg, var(--violet), var(--blue), #C9BBFF, var(--violet));
+  filter:blur(0.3px);
+  box-shadow:0 0 60px rgba(108,76,241,0.45), 0 0 120px rgba(61,139,255,0.25);
+  animation:orb-pulse 4s ease-in-out infinite;
+  position:relative;
+}
+.ai-orb::after{
+  content:''; position:absolute; inset:14px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.1) 40%, transparent 70%);
+}
+@keyframes orb-pulse{
+  0%,100%{ transform:scale(1); }
+  50%{ transform:scale(1.07); }
+}
+.orb-ring{ position:absolute; border-radius:50%; border:1.5px solid rgba(108,76,241,0.25); animation:ring-spin 14s linear infinite; }
+.orb-ring.r1{ width:200px; height:200px; }
+.orb-ring.r2{ width:250px; height:250px; border-color:rgba(61,139,255,0.18); animation-duration:20s; animation-direction:reverse; }
+.orb-ring.r3{ width:280px; height:280px; border-color:rgba(108,76,241,0.12); animation-duration:28s; }
+@keyframes ring-spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+.orb-ring::before{
+  content:''; position:absolute; top:-3px; left:50%; width:6px; height:6px; border-radius:50%;
+  background:var(--violet); box-shadow:0 0 10px var(--violet);
+}
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:12.5px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--violet-dark); background:var(--surface-2); padding:7px 14px; border-radius:999px;
+  border:1px solid #E3DCFF;
+}
+
+/* ===================== LANDING PAGE ===================== */
+.hero{ padding:90px 6vw 60px; display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center; }
+.hero h1{ font-size:clamp(36px,4.6vw,62px); line-height:1.04; font-weight:700; margin:18px 0 18px; }
+.hero h1 .grad{ background:linear-gradient(100deg,var(--violet),var(--blue)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.hero p.sub{ font-size:18px; color:var(--muted); max-width:480px; line-height:1.6; margin-bottom:32px; }
+.hero-actions{ display:flex; gap:14px; flex-wrap:wrap; }
+.hero-stats{ display:flex; gap:34px; margin-top:46px; }
+.hero-stats .stat-num{ font-family:'Space Grotesk'; font-weight:700; font-size:26px; color:var(--ink); }
+.hero-stats .stat-label{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+
+.feature-strip{ padding:40px 6vw 90px; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.feature-strip .f-card{ padding:26px; }
+.feature-strip .f-icon{ width:44px;height:44px;border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--surface-2); color:var(--violet-dark); margin-bottom:16px; }
+.feature-strip h3{ font-size:17px; margin-bottom:8px; }
+.feature-strip p{ font-size:14px; color:var(--muted); line-height:1.55; }
+
+.landing-foot-cta{ margin:0 6vw 90px; padding:54px; border-radius:32px; background:linear-gradient(125deg,var(--indigo),var(--violet-dark) 60%, var(--blue)); color:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px; }
+.landing-foot-cta h2{ font-size:28px; max-width:420px; }
+.landing-foot-cta p{ opacity:0.8; margin-top:8px; max-width:420px; font-size:14.5px;}
+
+/* ===================== APP SHELL (dashboard etc.) ===================== */
+.app-shell{ display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+.sidebar{ background:var(--indigo); color:#fff; padding:24px 16px; display:flex; flex-direction:column; gap:6px; position:sticky; top:49px; height:calc(100vh - 49px); background-image:radial-gradient(circle at 0% 0%, rgba(108,76,241,0.5), transparent 50%);}
+.sidebar .side-logo{ display:flex; align-items:center; gap:10px; padding:8px 10px 26px; font-family:'Space Grotesk'; font-weight:700; font-size:17px; }
+.side-link{ display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:12px; font-size:14px; font-weight:500; color:rgba(255,255,255,0.65); transition:all .15s ease; }
+.side-link svg{ width:18px; height:18px; }
+.side-link:hover{ background:rgba(255,255,255,0.06); color:#fff; }
+.side-link.active{ background:rgba(255,255,255,0.12); color:#fff; box-shadow:inset 3px 0 0 var(--blue); }
+.side-divider{ height:1px; background:rgba(255,255,255,0.1); margin:14px 4px; }
+.side-bottom{ margin-top:auto; }
+.upgrade-card{ background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:16px; margin-top:10px; }
+.upgrade-card p{ font-size:12px; color:rgba(255,255,255,0.7); margin:6px 0 12px; line-height:1.5;}
+
+.main-col{ background:var(--surface); min-height:100vh; }
+.topbar{ display:flex; align-items:center; justify-content:space-between; padding:18px 32px; background:#fff; border-bottom:1px solid var(--line); position:sticky; top:49px; z-index:20;}
+.search-box{ display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 16px; width:340px; color:var(--muted); font-size:13.5px;}
+.search-box svg{ width:16px;height:16px; }
+.topbar-actions{ display:flex; align-items:center; gap:16px; }
+.icon-btn{ width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--surface); border:1px solid var(--line); position:relative; color:var(--ink); }
+.icon-btn .dot{ position:absolute; top:8px; right:8px; width:7px; height:7px; border-radius:50%; background:var(--danger); border:1.5px solid #fff;}
+.profile-chip{ display:flex; align-items:center; gap:10px; padding:6px 12px 6px 6px; border-radius:999px; border:1px solid var(--line); background:#fff; }
+.avatar{ width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--violet),var(--blue)); display:flex;align-items:center;justify-content:center; color:#fff; font-weight:700; font-size:13px; }
+
+.content{ padding:32px; }
+.section-head{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:14px;}
+.section-head h1{ font-size:26px; }
+.section-head .desc{ color:var(--muted); font-size:14.5px; margin-top:4px; }
+
+.grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.grid-2{ display:grid; grid-template-columns:1.4fr 1fr; gap:20px; }
+.grid-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
+
+.stat-card{ padding:22px; position:relative; overflow:hidden;}
+.stat-card .top-row{ display:flex; justify-content:space-between; align-items:flex-start; }
+.stat-card .stat-icon{ width:38px;height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;}
+.stat-card .stat-val{ font-family:'Space Grotesk'; font-size:30px; font-weight:700; margin-top:14px; }
+.stat-card .stat-label{ font-size:13px; color:var(--muted); margin-top:2px;}
+.trend{ font-size:12.5px; font-weight:600; display:inline-flex; align-items:center; gap:4px; padding:4px 9px; border-radius:999px;}
+.trend.up{ color:var(--success); background:#E7F8F1; }
+.trend.down{ color:var(--danger); background:#FDECEE;}
+
+.card-pad{ padding:24px; }
+.card-title-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+.card-title-row h3{ font-size:16px; }
+.link-sm{ font-size:13px; color:var(--violet-dark); font-weight:600; }
+
+.history-row{ display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--line); }
+.history-row:last-child{ border-bottom:none; }
+.hist-icon{ width:40px;height:40px;border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.hist-info{ flex:1; }
+.hist-info .t{ font-size:14px; font-weight:600; }
+.hist-info .s{ font-size:12.5px; color:var(--muted); margin-top:2px;}
+.score-pill{ font-family:'JetBrains Mono'; font-weight:600; font-size:13px; padding:5px 11px; border-radius:9px; }
+.score-pill.good{ background:#E7F8F1; color:var(--success); }
+.score-pill.mid{ background:#FFF3E2; color:var(--warn); }
+.score-pill.low{ background:#FDECEE; color:var(--danger); }
+
+/* ===================== SETUP PAGE ===================== */
+.setup-wrap{ max-width:880px; margin:0 auto; }
+.setup-step-label{ font-size:13px; font-weight:700; color:var(--violet-dark); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px;}
+.option-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:36px;}
+.option-card{ padding:24px 20px; border-radius:18px; border:2px solid var(--line); background:#fff; cursor:pointer; transition:all .2s ease; text-align:left;}
+.option-card:hover{ border-color:#C9BBFF; transform:translateY(-3px); }
+.option-card.selected{ border-color:var(--violet); background:linear-gradient(180deg,#FBFAFF,#F4F1FF); box-shadow:0 10px 24px -10px rgba(108,76,241,0.35);}
+.option-card .oi{ width:42px;height:42px;border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:14px; background:var(--surface-2); color:var(--violet-dark);}
+.option-card h4{ font-size:15.5px; margin-bottom:4px;}
+.option-card p{ font-size:12.5px; color:var(--muted); line-height:1.5;}
+.diff-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:8px;}
+.diff-card{ padding:18px; border-radius:16px; border:2px solid var(--line); background:#fff; text-align:center; cursor:pointer; transition:all .2s ease;}
+.diff-card:hover{ border-color:#C9BBFF; }
+.diff-card.selected{ border-color:var(--violet); background:#F4F1FF;}
+.diff-dot{ width:10px;height:10px; border-radius:50%; margin:0 auto 8px;}
+.setup-footer{ display:flex; justify-content:space-between; align-items:center; margin-top:40px; padding-top:24px; border-top:1px solid var(--line);}
+
+/* ===================== INTERVIEW SCREEN ===================== */
+.interview-shell{ max-width:920px; margin:0 auto; }
+.interviewer-bar{ display:flex; align-items:center; gap:18px; padding:20px 24px; border-radius:20px; margin-bottom:22px; background:linear-gradient(120deg,var(--indigo),var(--violet-dark)); color:#fff;}
+.mini-orb{ width:56px;height:56px;border-radius:50%; background:conic-gradient(from 120deg,var(--violet),var(--blue),#C9BBFF,var(--violet)); position:relative; flex-shrink:0; box-shadow:0 0 30px rgba(108,76,241,0.6);}
+.mini-orb::after{content:'';position:absolute;inset:7px;border-radius:50%;background:radial-gradient(circle at 35% 30%, rgba(255,255,255,0.85), transparent 65%);}
+.wave-bars{ display:flex; align-items:center; gap:3px; height:24px; margin-left:auto;}
+.wave-bars span{ width:3px; background:rgba(255,255,255,0.7); border-radius:2px; animation:wave 1.1s ease-in-out infinite; }
+.wave-bars span:nth-child(1){height:40%; animation-delay:0s;}
+.wave-bars span:nth-child(2){height:80%; animation-delay:.1s;}
+.wave-bars span:nth-child(3){height:55%; animation-delay:.2s;}
+.wave-bars span:nth-child(4){height:100%; animation-delay:.3s;}
+.wave-bars span:nth-child(5){height:65%; animation-delay:.4s;}
+.wave-bars span:nth-child(6){height:35%; animation-delay:.5s;}
+@keyframes wave{ 0%,100%{ transform:scaleY(0.5);} 50%{ transform:scaleY(1);} }
+
+.q-card{ padding:30px; margin-bottom:20px;}
+.q-meta{ display:flex; gap:10px; margin-bottom:16px;}
+.tag{ font-size:11.5px; font-weight:700; padding:5px 11px; border-radius:999px; text-transform:uppercase; letter-spacing:.04em;}
+.tag.purple{ background:var(--surface-2); color:var(--violet-dark);}
+.tag.blue{ background:#E7F0FF; color:var(--blue);}
+.q-text{ font-size:20px; font-weight:600; line-height:1.5; margin-bottom:6px;}
+.q-progress{ display:flex; gap:6px; margin-top:20px;}
+.q-progress .seg{ height:5px; flex:1; border-radius:99px; background:var(--line);}
+.q-progress .seg.done{ background:linear-gradient(90deg,var(--violet),var(--blue)); }
+
+.answer-box{ padding:0; overflow:hidden;}
+.answer-textarea{ width:100%; border:none; outline:none; resize:none; padding:22px; font-size:15px; font-family:inherit; min-height:140px; color:var(--ink);}
+.answer-toolbar{ display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-top:1px solid var(--line); background:var(--surface);}
+.timer-chip{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono'; font-weight:600; font-size:14px; color:var(--ink); background:#fff; border:1px solid var(--line); padding:8px 14px; border-radius:11px;}
+.mic-btn{ width:46px;height:46px; border-radius:50%; background:linear-gradient(135deg,var(--violet),var(--blue)); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 20px -6px rgba(108,76,241,0.6); flex-shrink:0;}
+.mic-btn.recording{ animation:mic-pulse 1.4s ease-in-out infinite; }
+@keyframes mic-pulse{ 0%{box-shadow:0 0 0 0 rgba(239,92,110,0.5);} 70%{box-shadow:0 0 0 16px rgba(239,92,110,0);} 100%{box-shadow:0 0 0 0 rgba(239,92,110,0);} }
+.interview-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:22px;}
+
+/* ===================== FEEDBACK PAGE ===================== */
+.score-hero{ display:flex; align-items:center; gap:36px; padding:34px; margin-bottom:24px;}
+.ring-wrap{ position:relative; width:150px; height:150px; flex-shrink:0;}
+.ring-wrap svg{ transform:rotate(-90deg); }
+.ring-val{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+.ring-val .n{ font-family:'Space Grotesk'; font-size:34px; font-weight:700;}
+.ring-val .l{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;}
+.subscore{ display:flex; align-items:center; gap:14px; margin-bottom:18px;}
+.subscore:last-child{margin-bottom:0;}
+.subscore .label-row{ display:flex; justify-content:space-between; font-size:13.5px; font-weight:600; margin-bottom:7px;}
+.bar-track{ height:9px; background:var(--surface-2); border-radius:99px; overflow:hidden; width:100%;}
+.bar-fill{ height:100%; border-radius:99px; background:linear-gradient(90deg,var(--violet),var(--blue));}
+.tip-row{ display:flex; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); align-items:flex-start;}
+.tip-row:last-child{border-bottom:none;}
+.tip-icon{ width:26px;height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;}
+
+/* ===================== PROGRESS PAGE ===================== */
+.badge-card{ text-align:center; padding:22px 14px;}
+.badge-icon{ width:58px;height:58px; border-radius:16px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center;}
+.badge-card h4{ font-size:13.5px; margin-bottom:4px;}
+.badge-card p{ font-size:11.5px; color:var(--muted);}
+.badge-card.locked{ opacity:0.45; }
+
+/* ===================== Chatbot widget ===================== */
+.chat-fab{ position:fixed; bottom:26px; right:26px; width:58px;height:58px;border-radius:50%; background:linear-gradient(135deg,var(--violet),var(--blue)); display:flex; align-items:center; justify-content:center; box-shadow:0 14px 30px -8px rgba(108,76,241,0.6); z-index:200; color:#fff;}
+.chat-fab:hover{ transform:scale(1.06); }
+.chat-panel{ position:fixed; bottom:96px; right:26px; width:330px; border-radius:20px; overflow:hidden; z-index:200; display:none; box-shadow:0 24px 60px -12px rgba(21,19,43,0.35); border:1px solid var(--line); background:#fff;}
+.chat-panel.open{ display:block; animation:fadein .3s ease;}
+.chat-head{ background:linear-gradient(120deg,var(--indigo),var(--violet-dark)); color:#fff; padding:16px 18px; display:flex; align-items:center; gap:10px;}
+.chat-body{ padding:16px; max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;}
+.bubble{ padding:10px 14px; border-radius:14px; font-size:13.5px; line-height:1.5; max-width:85%;}
+.bubble.bot{ background:var(--surface-2); border-bottom-left-radius:4px; }
+.bubble.user{ background:var(--ink); color:#fff; margin-left:auto; border-bottom-right-radius:4px;}
+.chat-input{ display:flex; gap:8px; padding:12px; border-top:1px solid var(--line);}
+.chat-input input{ flex:1; border:1px solid var(--line); border-radius:10px; padding:9px 12px; font-size:13px; outline:none;}
+
+/* Dark mode toggle (visual only) */
+.dm-toggle{ width:44px; height:24px; border-radius:99px; background:var(--surface-2); border:1px solid var(--line); position:relative; flex-shrink:0;}
+.dm-toggle::after{ content:''; position:absolute; top:2px; left:2px; width:18px;height:18px;border-radius:50%; background:linear-gradient(135deg,var(--violet),var(--blue)); transition:transform .2s ease;}
+.dm-toggle.on::after{ transform:translateX(20px); }
+
+@media (max-width: 980px){
+  .hero{ grid-template-columns:1fr; padding-top:50px;}
+  .feature-strip{ grid-template-columns:1fr; }
+  .grid-3, .grid-4{ grid-template-columns:1fr 1fr; }
+  .grid-2{ grid-template-columns:1fr; }
+  .app-shell{ grid-template-columns:1fr; }
+  .sidebar{ display:none; }
+  .option-grid, .diff-grid{ grid-template-columns:1fr; }
+  .search-box{ width:180px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ DEMO PAGE SWITCHER (navigation across the 6 deliverable pages) ============ -->
+<nav class="demo-switcher" id="switcher">
+  <div class="brandmark"><span class="logo-orb"></span>Aceify</div>
+  <button class="switch-btn active" data-page="landing">Landing</button>
+  <button class="switch-btn" data-page="dashboard">Dashboard</button>
+  <button class="switch-btn" data-page="setup">Interview Setup</button>
+  <button class="switch-btn" data-page="interview">Mock Interview</button>
+  <button class="switch-btn" data-page="feedback">AI Feedback</button>
+  <button class="switch-btn" data-page="progress">Progress Tracking</button>
+</nav>
+
+<!-- ============ 1. LANDING PAGE ============ -->
+<section class="page active grain-bg" id="page-landing">
+  <div class="hero">
+    <div>
+      <span class="eyebrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg> AI‑Powered Interview Coach</span>
+      <h1>Ace Your <span class="grad">Interviews</span> with AI</h1>
+      <p class="sub">Practice mock interviews, get instant feedback, and improve your confidence — built for students and job seekers who want to walk in prepared.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="goTo('setup')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Start Mock Interview
+        </button>
+        <button class="btn btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Upload Resume
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">120K+</div><div class="stat-label">Mock interviews run</div></div>
+        <div><div class="stat-num">4.9/5</div><div class="stat-label">Avg. learner rating</div></div>
+        <div><div class="stat-num">38%</div><div class="stat-label">Avg. score lift</div></div>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:center;">
+      <div class="ai-orb-wrap">
+        <div class="orb-ring r3"></div>
+        <div class="orb-ring r2"></div>
+        <div class="orb-ring r1"></div>
+        <div class="ai-orb"></div>
+        <div style="position:absolute; top:8px; right:6px;" class="card glass" ><div style="padding:10px 14px; display:flex; align-items:center; gap:8px;"><span style="width:8px;height:8px;border-radius:50%;background:var(--success);"></span><span style="font-size:12px; font-weight:600;">Listening…</span></div></div>
+        <div style="position:absolute; bottom:0px; left:-30px;" class="card glass"><div style="padding:10px 14px;"><div style="font-size:11px; color:var(--muted);">Confidence Score</div><div style="font-family:'Space Grotesk'; font-weight:700; font-size:18px; color:var(--violet-dark);">87%</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-strip">
+    <div class="card f-card">
+      <div class="f-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 7l7-6 7 6M5 17l7 6 7-6"/></svg></div>
+      <h3>Realistic AI interviewers</h3>
+      <p>Voice and text-based mock interviews across Technical, HR, and Aptitude tracks, tuned to your target role.</p>
+    </div>
+    <div class="card f-card">
+      <div class="f-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <h3>Instant, structured feedback</h3>
+      <p>Scores for communication, technical depth, and confidence — with clear, personalized suggestions.</p>
+    </div>
+    <div class="card f-card">
+      <div class="f-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 5-6"/></svg></div>
+      <h3>Track your progress</h3>
+      <p>Watch your scores trend upward over time, and unlock achievement badges as you improve.</p>
+    </div>
+  </div>
+
+  <div class="landing-foot-cta">
+    <div><h2>Your next interview doesn't have to feel like the first one.</h2><p>Upload your resume and let Aceify tailor every question to your experience.</p></div>
+    <button class="btn" style="background:#fff; color:var(--violet-dark);" onclick="goTo('dashboard')">Go to Dashboard →</button>
+  </div>
+</section>
+
+<!-- ============ 2. DASHBOARD ============ -->
+<section class="page" id="page-dashboard">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="side-logo"><span class="logo-orb"></span>Aceify</div>
+      <a class="side-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</a>
+      <a class="side-link" onclick="goTo('setup')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>New Interview</a>
+      <a class="side-link" onclick="goTo('progress')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 5-6"/></svg>Progress</a>
+      <a class="side-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Resume</a>
+      <a class="side-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 0 1 10.7-12A8.38 8.38 0 0 1 21 11.5z"/></svg>AI Assistant</a>
+      <div class="side-divider"></div>
+      <a class="side-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+      <div class="side-bottom">
+        <div class="upgrade-card">
+          <strong style="font-size:13px;">Go Pro</strong>
+          <p>Unlimited mock interviews and advanced analytics.</p>
+          <button class="btn btn-sm" style="background:#fff; color:var(--indigo); width:100%;">Upgrade</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-col">
+      <div class="topbar">
+        <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search interviews, topics…</div>
+        <div class="topbar-actions">
+          <div class="dm-toggle" title="Dark mode"></div>
+          <div class="icon-btn"><span class="dot"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <div class="profile-chip"><div class="avatar">JS</div><div><div style="font-size:13px; font-weight:600;">Jordan Smith</div><div style="font-size:11px; color:var(--muted);">Job Seeker</div></div></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="section-head">
+          <div><h1>Welcome back, Jordan 👋</h1><div class="desc">Here's how your interview prep is going this week.</div></div>
+          <button class="btn btn-primary" onclick="goTo('setup')"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Quick Start Interview</button>
+        </div>
+
+        <div class="grid-4" style="margin-bottom:20px;">
+          <div class="card stat-card">
+            <div class="top-row"><div class="stat-icon" style="background:var(--surface-2); color:var(--violet-dark);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><span class="trend up">▲ 12%</span></div>
+            <div class="stat-val">82<span style="font-size:16px; color:var(--muted);">/100</span></div>
+            <div class="stat-label">Performance Score</div>
+          </div>
+          <div class="card stat-card">
+            <div class="top-row"><div class="stat-icon" style="background:#E7F0FF; color:var(--blue);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="trend up">▲ 3</span></div>
+            <div class="stat-val">24</div>
+            <div class="stat-label">Interviews Completed</div>
+          </div>
+          <div class="card stat-card">
+            <div class="top-row"><div class="stat-icon" style="background:#E7F8F1; color:var(--success);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 7l7-6 7 6M5 17l7 6 7-6"/></svg></div><span class="trend up">▲ 8%</span></div>
+            <div class="stat-val">91%</div>
+            <div class="stat-label">Confidence Score</div>
+          </div>
+          <div class="card stat-card">
+            <div class="top-row"><div class="stat-icon" style="background:#FFF3E2; color:var(--warn);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span class="trend down">▼ 2m</span></div>
+            <div class="stat-val">6h 40m</div>
+            <div class="stat-label">Practice Time</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card card-pad">
+            <div class="card-title-row"><h3>Progress Over Time</h3><span class="link-sm">Last 8 sessions</span></div>
+            <canvas id="dashChart" height="130"></canvas>
+          </div>
+          <div class="card card-pad">
+            <div class="card-title-row"><h3>Recent Interview History</h3><a class="link-sm" onclick="goTo('progress')">View all</a></div>
+            <div class="history-row">
+              <div class="hist-icon" style="background:var(--surface-2); color:var(--violet-dark);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              <div class="hist-info"><div class="t">Technical — Data Structures</div><div class="s">Today, 9:40 AM · 32 min</div></div>
+              <span class="score-pill good">88%</span>
+            </div>
+            <div class="history-row">
+              <div class="hist-icon" style="background:#E7F0FF; color:var(--blue);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <div class="hist-info"><div class="t">HR — Behavioral Round</div><div class="s">Yesterday, 6:10 PM · 24 min</div></div>
+              <span class="score-pill mid">73%</span>
+            </div>
+            <div class="history-row">
+              <div class="hist-icon" style="background:#FFF3E2; color:var(--warn);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div class="hist-info"><div class="t">Aptitude — Quant Reasoning</div><div class="s">Mon, 11:05 AM · 18 min</div></div>
+              <span class="score-pill low">58%</span>
+            </div>
+            <div class="history-row">
+              <div class="hist-icon" style="background:var(--surface-2); color:var(--violet-dark);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              <div class="hist-info"><div class="t">Technical — System Design</div><div class="s">Last week · 41 min</div></div>
+              <span class="score-pill good">85%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. INTERVIEW SETUP PAGE ============ -->
+<section class="page grain-bg" id="page-setup">
+  <div class="content" style="padding:60px 6vw;">
+    <div class="setup-wrap">
+      <div style="text-align:center; margin-bottom:40px;">
+        <span class="eyebrow">Step 1 of 2 · Setup</span>
+        <h1 style="font-size:32px; margin-top:14px;">Configure your mock interview</h1>
+        <p style="color:var(--muted); margin-top:8px;">Choose a track and difficulty — Aceify will tailor every question to match.</p>
+      </div>
+
+      <div class="setup-step-label">Select Interview Type</div>
+      <div class="option-grid">
+        <button class="option-card selected" onclick="selectCard(this,'type')">
+          <div class="oi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+          <h4>Technical</h4><p>Coding, data structures, system design & CS fundamentals.</p>
+        </button>
+        <button class="option-card" onclick="selectCard(this,'type')">
+          <div class="oi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <h4>HR</h4><p>Behavioral questions, culture fit, and communication.</p>
+        </button>
+        <button class="option-card" onclick="selectCard(this,'type')">
+          <div class="oi"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <h4>Aptitude</h4><p>Quantitative, logical reasoning, and problem solving.</p>
+        </button>
+      </div>
+
+      <div class="setup-step-label">Select Difficulty</div>
+      <div class="diff-grid">
+        <button class="diff-card" onclick="selectCard(this,'diff')"><div class="diff-dot" style="background:var(--success);"></div><strong>Easy</strong><p style="font-size:12px;color:var(--muted); margin-top:4px;">Warm‑up, fundamentals</p></button>
+        <button class="diff-card selected" onclick="selectCard(this,'diff')"><div class="diff-dot" style="background:var(--warn);"></div><strong>Medium</strong><p style="font-size:12px;color:var(--muted); margin-top:4px;">Real interview pace</p></button>
+        <button class="diff-card" onclick="selectCard(this,'diff')"><div class="diff-dot" style="background:var(--danger);"></div><strong>Hard</strong><p style="font-size:12px;color:var(--muted); margin-top:4px;">Top‑tier company level</p></button>
+      </div>
+
+      <div class="card card-pad" style="margin-top:10px; display:flex; align-items:center; gap:14px;">
+        <div class="stat-icon" style="background:var(--surface-2); color:var(--violet-dark); width:42px;height:42px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+        <div style="flex:1;"><div style="font-weight:600; font-size:14px;">Resume_Jordan_Smith.pdf attached</div><div style="font-size:12.5px; color:var(--muted);">Questions will be personalized to your experience.</div></div>
+        <a class="link-sm">Replace</a>
+      </div>
+
+      <div class="setup-footer">
+        <button class="btn btn-secondary" onclick="goTo('dashboard')">← Back to Dashboard</button>
+        <button class="btn btn-primary" onclick="goTo('interview')">Start Interview <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. MOCK INTERVIEW SCREEN ============ -->
+<section class="page" id="page-interview" style="background:var(--surface); min-height:100vh;">
+  <div class="content" style="padding:40px 6vw;">
+    <div class="interview-shell">
+      <div class="interviewer-bar">
+        <div class="mini-orb"></div>
+        <div>
+          <div style="font-weight:600; font-size:15px;">Aceify AI Interviewer</div>
+          <div style="font-size:12.5px; opacity:0.75;">Technical Round · Medium</div>
+        </div>
+        <div class="wave-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="card q-card">
+        <div class="q-meta"><span class="tag purple">Question 3 of 8</span><span class="tag blue">Data Structures</span></div>
+        <div class="q-text">"Can you explain the difference between a stack and a queue, and describe a real‑world scenario where you'd choose one over the other?"</div>
+        <div class="q-progress">
+          <div class="seg done"></div><div class="seg done"></div><div class="seg done"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div>
+        </div>
+      </div>
+
+      <div class="card answer-box">
+        <textarea class="answer-textarea" placeholder="Type your answer here, or use the mic to respond by voice…">A stack follows Last-In-First-Out order, while a queue follows First-In-First-Out. I'd use a stack for undo functionality in an editor, and a queue for...</textarea>
+        <div class="answer-toolbar">
+          <div class="timer-chip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 01:48</div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <span style="font-size:12px; color:var(--muted);">Tap to record</span>
+            <button class="mic-btn recording"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="interview-actions">
+        <button class="btn btn-secondary">⏸ Pause Interview</button>
+        <button class="btn btn-primary" onclick="goTo('feedback')">Next Question <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. AI FEEDBACK PAGE ============ -->
+<section class="page grain-bg" id="page-feedback">
+  <div class="content" style="padding:50px 6vw; max-width:1040px; margin:0 auto;">
+    <div class="section-head">
+      <div><span class="eyebrow">Session complete</span><h1 style="margin-top:12px;">Your AI Feedback Report</h1><div class="desc">Technical Round · Medium · 8 questions · 32 minutes</div></div>
+      <button class="btn btn-secondary" onclick="goTo('setup')">Retake Interview</button>
+    </div>
+
+    <div class="card score-hero">
+      <div class="ring-wrap">
+        <svg width="150" height="150"><circle cx="75" cy="75" r="64" stroke="#EDEAFB" stroke-width="14" fill="none"/><circle cx="75" cy="75" r="64" stroke="url(#g1)" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="68"/><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6C4CF1"/><stop offset="100%" stop-color="#3D8BFF"/></linearGradient></defs></svg>
+        <div class="ring-val"><div class="n">83</div><div class="l">Overall Score</div></div>
+      </div>
+      <div style="flex:1; display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px;">
+        <div class="subscore" style="display:block;"><div class="label-row"><span>Communication</span><span class="mono">88%</span></div><div class="bar-track"><div class="bar-fill" style="width:88%;"></div></div></div>
+        <div class="subscore" style="display:block;"><div class="label-row"><span>Technical Knowledge</span><span class="mono">79%</span></div><div class="bar-track"><div class="bar-fill" style="width:79%;"></div></div></div>
+        <div class="subscore" style="display:block;"><div class="label-row"><span>Confidence</span><span class="mono">91%</span></div><div class="bar-track"><div class="bar-fill" style="width:91%;"></div></div></div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="grid-template-columns:1fr 1fr;">
+      <div class="card card-pad">
+        <div class="card-title-row"><h3 style="color:var(--success);">✓ Strengths</h3></div>
+        <div class="tip-row"><div class="tip-icon" style="background:#E7F8F1; color:var(--success);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><strong style="font-size:13.5px;">Clear structure</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">Answers consistently followed a logical setup → example → conclusion flow.</p></div></div>
+        <div class="tip-row"><div class="tip-icon" style="background:#E7F8F1; color:var(--success);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><strong style="font-size:13.5px;">Confident delivery</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">Pacing and tone stayed steady, even on harder follow‑ups.</p></div></div>
+        <div class="tip-row"><div class="tip-icon" style="background:#E7F8F1; color:var(--success);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div><div><strong style="font-size:13.5px;">Strong use of examples</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">Real‑world analogies made technical answers easy to follow.</p></div></div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-title-row"><h3 style="color:var(--danger);">▲ Areas for Improvement</h3></div>
+        <div class="tip-row"><div class="tip-icon" style="background:#FDECEE; color:var(--danger);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><strong style="font-size:13.5px;">Time complexity depth</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">Big‑O analysis was often skipped — interviewers expect it unprompted.</p></div></div>
+        <div class="tip-row"><div class="tip-icon" style="background:#FDECEE; color:var(--danger);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div><strong style="font-size:13.5px;">Filler words</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">"Um" and "like" appeared 14 times — try a 1‑second pause instead.</p></div></div>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:20px;">
+      <div class="card-title-row"><h3>💡 Personalized Suggestions</h3></div>
+      <div class="tip-row"><div class="tip-icon" style="background:var(--surface-2); color:var(--violet-dark);">1</div><div><strong style="font-size:13.5px;">Practice Big‑O out loud</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">Narrate time/space complexity for every solution this week, even simple ones.</p></div></div>
+      <div class="tip-row"><div class="tip-icon" style="background:var(--surface-2); color:var(--violet-dark);">2</div><div><strong style="font-size:13.5px;">Try 2 more HR rounds</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">Your behavioral scores lag technical — balance your next 3 sessions.</p></div></div>
+      <div class="tip-row"><div class="tip-icon" style="background:var(--surface-2); color:var(--violet-dark);">3</div><div><strong style="font-size:13.5px;">Record yourself once a day</strong><p style="font-size:13px; color:var(--muted); margin-top:2px;">A short daily voice rep will cut filler‑word frequency fastest.</p></div></div>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:14px; margin-top:30px;">
+      <button class="btn btn-secondary" onclick="goTo('progress')">View Full Progress</button>
+      <button class="btn btn-primary" onclick="goTo('setup')">Practice Again</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. PROGRESS TRACKING PAGE ============ -->
+<section class="page" id="page-progress">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="side-logo"><span class="logo-orb"></span>Aceify</div>
+      <a class="side-link" onclick="goTo('dashboard')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Dashboard</a>
+      <a class="side-link" onclick="goTo('setup')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>New Interview</a>
+      <a class="side-link active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 4 4 5-6"/></svg>Progress</a>
+      <a class="side-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Resume</a>
+      <a class="side-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 0 1 10.7-12A8.38 8.38 0 0 1 21 11.5z"/></svg>AI Assistant</a>
+      <div class="side-divider"></div>
+      <a class="side-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+    </aside>
+
+    <div class="main-col">
+      <div class="topbar">
+        <div class="search-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Search…</div>
+        <div class="topbar-actions">
+          <div class="dm-toggle"></div>
+          <div class="icon-btn"><span class="dot"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+          <div class="profile-chip"><div class="avatar">JS</div><div><div style="font-size:13px; font-weight:600;">Jordan Smith</div><div style="font-size:11px; color:var(--muted);">Job Seeker</div></div></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="section-head"><div><h1>Progress Tracking</h1><div class="desc">Your performance analytics across every mock interview.</div></div></div>
+
+        <div class="grid-3" style="margin-bottom:20px;">
+          <div class="card stat-card"><div class="top-row"><div class="stat-icon" style="background:var(--surface-2); color:var(--violet-dark);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><span class="trend up">▲ 15 pts</span></div><div class="stat-val">82</div><div class="stat-label">Avg. Score (30 days)</div></div>
+          <div class="card stat-card"><div class="top-row"><div class="stat-icon" style="background:#E7F0FF; color:var(--blue);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><span class="trend up">▲ 6</span></div><div class="stat-val">24</div><div class="stat-label">Total Interviews</div></div>
+          <div class="card stat-card"><div class="top-row"><div class="stat-icon" style="background:#FFF3E2; color:var(--warn);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg></div><span class="trend up">5 new</span></div><div class="stat-val">12</div><div class="stat-label">Badges Earned</div></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:20px;">
+          <div class="card card-pad">
+            <div class="card-title-row"><h3>Score Improvement</h3><span class="link-sm">Last 12 sessions</span></div>
+            <canvas id="progressChart" height="140"></canvas>
+          </div>
+          <div class="card card-pad">
+            <div class="card-title-row"><h3>By Category</h3></div>
+            <canvas id="categoryChart" height="140"></canvas>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-bottom:20px;">
+          <div class="card-title-row"><h3>Achievement Badges</h3></div>
+          <div class="grid-4">
+            <div class="card badge-card"><div class="badge-icon" style="background:#FFF3E2; color:var(--warn);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg></div><h4>First Interview</h4><p>Completed onboarding</p></div>
+            <div class="card badge-card"><div class="badge-icon" style="background:#E7F8F1; color:var(--success);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><h4>7‑Day Streak</h4><p>Practiced all week</p></div>
+            <div class="card badge-card"><div class="badge-icon" style="background:var(--surface-2); color:var(--violet-dark);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M5 7l7-6 7 6M5 17l7 6 7-6"/></svg></div><h4>Score 80+</h4><p>Hit a top score</p></div>
+            <div class="card badge-card locked"><div class="badge-icon" style="background:var(--surface-2); color:var(--muted);"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div><h4>Interview Pro</h4><p>Locked · 50 sessions</p></div>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div class="card-title-row"><h3>Full Interview History</h3></div>
+          <div class="history-row"><div class="hist-icon" style="background:var(--surface-2); color:var(--violet-dark);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><div class="hist-info"><div class="t">Technical — Data Structures</div><div class="s">Today, 9:40 AM · Medium</div></div><span class="score-pill good">88%</span></div>
+          <div class="history-row"><div class="hist-icon" style="background:#E7F0FF; color:var(--blue);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="hist-info"><div class="t">HR — Behavioral Round</div><div class="s">Yesterday · Easy</div></div><span class="score-pill mid">73%</span></div>
+          <div class="history-row"><div class="hist-icon" style="background:#FFF3E2; color:var(--warn);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="hist-info"><div class="t">Aptitude — Quant Reasoning</div><div class="s">Mon · Hard</div></div><span class="score-pill low">58%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHATBOT WIDGET (global) ============ -->
+<button class="chat-fab" onclick="toggleChat()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 0 1 10.7-12A8.38 8.38 0 0 1 21 11.5z"/></svg></button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head"><div class="mini-orb" style="width:34px;height:34px;"></div><div><div style="font-weight:600; font-size:13.5px;">Aceify Assistant</div><div style="font-size:11px; opacity:0.75;">Online</div></div></div>
+  <div class="chat-body">
+    <div class="bubble bot">Hi Jordan! Want tips before your next technical round?</div>
+    <div class="bubble user">Yes, what should I focus on?</div>
+    <div class="bubble bot">Practice explaining Big‑O out loud — it's your biggest gap right now 👀</div>
+  </div>
+  <div class="chat-input"><input type="text" placeholder="Ask me anything…"><button class="btn btn-sm btn-primary">→</button></div>
+</div>
+
+<script>
+function goTo(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.switch-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.switch-btn[data-page="'+name+'"]').classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('.switch-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>goTo(btn.dataset.page));
+});
+function selectCard(el, group){
+  const parent = el.parentElement;
+  parent.querySelectorAll(group==='type' ? '.option-card' : '.diff-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function toggleChat(){
+  document.getElementById('chatPanel').classList.toggle('open');
+}
+document.querySelectorAll('.dm-toggle').forEach(t=>t.addEventListener('click', ()=>t.classList.toggle('on')));
+
+const chartDefaults = {
+  plugins:{ legend:{ display:false } },
+  scales:{
+    x:{ grid:{ display:false }, ticks:{ color:'#6B6A82', font:{size:11} } },
+    y:{ grid:{ color:'#EFEDFB' }, ticks:{ color:'#6B6A82', font:{size:11} } }
+  }
+};
+
+new Chart(document.getElementById('dashChart'), {
+  type:'line',
+  data:{
+    labels:['S1','S2','S3','S4','S5','S6','S7','S8'],
+    datasets:[{
+      data:[58,63,60,70,68,76,79,82],
+      borderColor:'#6C4CF1', borderWidth:3, tension:.4, fill:true,
+      backgroundColor:(ctx)=>{ const g=ctx.chart.ctx.createLinearGradient(0,0,0,160); g.addColorStop(0,'rgba(108,76,241,0.25)'); g.addColorStop(1,'rgba(108,76,241,0)'); return g; },
+      pointBackgroundColor:'#fff', pointBorderColor:'#6C4CF1', pointBorderWidth:2, pointRadius:4
+    }]
+  },
+  options:{...chartDefaults, maintainAspectRatio:false}
+});
+
+new Chart(document.getElementById('progressChart'), {
+  type:'line',
+  data:{
+    labels:['1','2','3','4','5','6','7','8','9','10','11','12'],
+    datasets:[{
+      data:[52,55,60,58,65,70,68,74,77,80,79,83],
+      borderColor:'#3D8BFF', borderWidth:3, tension:.4, fill:true,
+      backgroundColor:(ctx)=>{ const g=ctx.chart.ctx.createLinearGradient(0,0,0,160); g.addColorStop(0,'rgba(61,139,255,0.22)'); g.addColorStop(1,'rgba(61,139,255,0)'); return g; },
+      pointBackgroundColor:'#fff', pointBorderColor:'#3D8BFF', pointBorderWidth:2, pointRadius:3
+    }]
+  },
+  options:{...chartDefaults, maintainAspectRatio:false}
+});
+
+new Chart(document.getElementById('categoryChart'), {
+  type:'bar',
+  data:{
+    labels:['Technical','HR','Aptitude'],
+    datasets:[{
+      data:[85,74,66],
+      backgroundColor:['#6C4CF1','#3D8BFF','#C9BBFF'],
+      borderRadius:8, maxBarThickness:46
+    }]
+  },
+  options:{...chartDefaults, maintainAspectRatio:false}
+});
+</script>
+</body>
+</html>
